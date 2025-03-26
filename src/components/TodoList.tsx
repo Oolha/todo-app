@@ -35,9 +35,9 @@ const TodoList: React.FC = () => {
   };
 
   return (
-    <div className="todo-container">
+    <div className="max-w-lg mx-auto my-8 bg-white rounded-2xl shadow-md p-6">
       <motion.h1
-        className="todo-title"
+        className="text-pink-500 text-center font-bold text-2xl mb-6"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
@@ -46,7 +46,7 @@ const TodoList: React.FC = () => {
       </motion.h1>
       <motion.form
         onSubmit={handleAddTodo}
-        className="todo-form"
+        className="flex mb-6"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.1 }}
@@ -56,13 +56,13 @@ const TodoList: React.FC = () => {
           value={newTodoText}
           onChange={(e) => setNewTodoText(e.target.value)}
           placeholder="Add a new task..."
-          className="todo-input"
+          className="flex-grow py-3 px-4 border border-gray-100 rounded-l-lg text-sm shadow-sm focus:outline-none focus:border-pink-300 focus:ring-3 focus:ring-pink-100 transition-colors"
           aria-label="New todo text"
         />
         <button
           type="submit"
           disabled={!newTodoText.trim()}
-          className="todo-button"
+          className="bg-pink-300 text-white font-semibold px-4 rounded-r-lg flex items-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-pink-500 transition-colors"
           aria-label="Add new todo"
         >
           <PlusIcon className="h-5 w-5 mr-1" />
@@ -72,28 +72,30 @@ const TodoList: React.FC = () => {
 
       {/* Loading State */}
       {isLoading && (
-        <div className="loading">
-          <div className="loading-spinner"></div>
+        <div className="flex justify-center items-center py-8">
+          <div className="border-4 border-gray-100 border-t-pink-300 rounded-full w-8 h-8 animate-spin"></div>
         </div>
       )}
 
       {/* Error State */}
       {error && (
-        <p className="text-center py-4 text-red-500">
+        <div className="bg-red-100 rounded-lg p-4 text-red-600 text-center my-4">
           Failed to load task list. Please try again later.
-        </p>
+        </div>
       )}
 
       {/* Empty State */}
       {!isLoading && todos.length === 0 && (
-        <p className="text-center text-gray-500">No tasks yet</p>
+        <div className="text-center py-8 text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
+          No tasks yet
+        </div>
       )}
 
       {/* Todo List with AnimatePresence */}
       <AnimatePresence>
         {!isLoading && todos.length > 0 && (
           <motion.div
-            className="todo-list"
+            className="flex flex-col gap-3"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
@@ -112,16 +114,16 @@ const TodoList: React.FC = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
-          <div className="progress-container">
+          <div className="mt-5 bg-gray-100 rounded-full h-2 overflow-hidden">
             <motion.div
-              className="progress-bar"
+              className="h-full bg-pink-300 rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${progressPercentage}%` }}
               transition={{ duration: 0.5 }}
             ></motion.div>
           </div>
 
-          <div className="todo-status">
+          <div className="flex justify-between text-sm text-gray-500 mt-3">
             <span>Total: {todos.length} tasks</span>
             <span>
               Completed: {completedCount} / {todos.length}
@@ -132,4 +134,5 @@ const TodoList: React.FC = () => {
     </div>
   );
 };
+
 export default TodoList;
