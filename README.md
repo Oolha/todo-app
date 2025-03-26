@@ -95,3 +95,7 @@ Since JSONPlaceholder doesn't actually save changes, the app implements its own 
 1. Initial data is loaded from the API
 2. All changes are saved to localStorage
 3. On page refresh, the app loads data from localStorage
+
+### Live DEMO
+
+https://todo-app-mu-red.vercel.app/
