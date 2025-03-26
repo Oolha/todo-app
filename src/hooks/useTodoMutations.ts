@@ -1,3 +1,4 @@
+"use client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addTodo, deleteTodo } from "@/services/todoService";
 import { NewTodo, Todo } from "@/types";
