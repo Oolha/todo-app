@@ -1,52 +1,67 @@
-import { ApiError, NewTodo, Todo } from "@/types";
+import { NewTodo, Todo } from "@/types";
+import { getStoredTodos } from "@/utils/localeStorage";
 import axios from "axios";
 
 const BASE_URL = "https://jsonplaceholder.typicode.com/todos";
+const API_LIMIT = 10;
+
+const todoApi = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 //get todos
-export const getTodos = async (limit: number = 10): Promise<Todo[]> => {
+
+export const getTodos = async (): Promise<Todo[]> => {
+  const localTodos = getStoredTodos();
+
+  if (localTodos.length > 0) {
+    return localTodos;
+  }
+
   try {
-    const response = await axios.get<Todo[]>(`${BASE_URL}?_limit=${limit}`);
+    const response = await todoApi.get<Todo[]>(`?_limit=${API_LIMIT}`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching todos:", error);
-    throw createApiError(error, "Failed to fetch todos");
+    console.error("Failed to fetch todos:", error);
+    return [];
   }
 };
-
 //add new todo
-export const addTodo = async (todo: NewTodo): Promise<Todo> => {
+
+export const addTodo = async (newTodo: NewTodo): Promise<Todo> => {
   try {
-    const response = await axios.post<Todo>(BASE_URL, todo);
+    const response = await todoApi.post<Todo>("", newTodo);
     return response.data;
   } catch (error) {
-    console.error("Error adding todo:", error);
-    throw createApiError(error, "Failed to add todo");
+    console.error("Failed to add todo:", error);
+    throw error;
   }
 };
 
 //delete todo
-export const deleteTodo = async (id: number): Promise<boolean> => {
+
+export const deleteTodo = async (id: number): Promise<void> => {
   try {
-    await axios.delete(`${BASE_URL}/${id}`);
-    return true;
+    await todoApi.delete(`/${id}`);
   } catch (error) {
-    console.error("Error deleting todo:", error);
-    throw createApiError(error, "Failed to delete todo");
+    console.error(`Failed to delete todo with id ${id}:`, error);
+    throw error;
   }
 };
 
-//create an error object
-const createApiError = (error: unknown, defaultMessage: string): ApiError => {
-  if (axios.isAxiosError(error)) {
-    return {
-      message: error.response?.data?.message || error.message || defaultMessage,
-      status: error.response?.status,
-      code: error.code,
-    };
-  }
+//toggle todo completion status
 
-  return {
-    message: error instanceof Error ? error.message : defaultMessage,
-  };
+export const toggleTodoCompletion = async (
+  id: number,
+  completed: boolean
+): Promise<void> => {
+  try {
+    await todoApi.patch(`/${id}`, { completed });
+  } catch (error) {
+    console.error(`Failed to toggle todo completion with id ${id}:`, error);
+    throw error;
+  }
 };

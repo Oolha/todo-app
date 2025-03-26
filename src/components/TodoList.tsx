@@ -8,27 +8,24 @@ import { useTodoMutations } from "@/hooks/useTodoMutations";
 const TodoList: React.FC = () => {
   const [newTodoText, setNewTodoText] = useState("");
   const { todosQuery } = useTodoQueries();
-  const { addTodoMutation, deleteTodoMutation } = useTodoMutations();
+  const { addTodoMutation } = useTodoMutations();
 
   const { data: todos = [], isLoading, error } = todosQuery;
 
   const handleAddTodo = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!newTodoText.trim()) return;
+    const trimmedText = newTodoText.trim();
+    if (!trimmedText) return;
 
     const newTodo: NewTodo = {
-      title: newTodoText.trim(),
+      title: trimmedText,
       completed: false,
       userId: 1,
     };
 
     addTodoMutation.mutate(newTodo);
     setNewTodoText("");
-  };
-
-  const handleDeleteTodo = (id: number) => {
-    deleteTodoMutation.mutate(id);
   };
 
   return (
@@ -57,11 +54,19 @@ const TodoList: React.FC = () => {
         {todos.length === 0 && !isLoading ? (
           <p className="text-center text-gray-500">No tasks yet</p>
         ) : (
-          todos.map((todo) => (
-            <TodoItem todo={todo} key={todo.id} onDelete={handleDeleteTodo} />
-          ))
+          todos.map((todo) => <TodoItem todo={todo} key={todo.id} />)
         )}
       </div>
+      {/* Todo Summary */}
+      {!isLoading && todos.length > 0 && (
+        <div className="mt-6 pt-4 border-t text-sm text-gray-500 flex justify-between">
+          <span>Total: {todos.length} tasks</span>
+          <span>
+            Completed: {todos.filter((todo) => todo.completed).length} /{" "}
+            {todos.length}
+          </span>
+        </div>
+      )}
     </div>
   );
 };

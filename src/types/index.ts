@@ -10,9 +10,3 @@ export interface NewTodo {
   completed: boolean;
   userId: number;
 }
-
-export interface ApiError {
-  message: string;
-  status?: number;
-  code?: string;
-}

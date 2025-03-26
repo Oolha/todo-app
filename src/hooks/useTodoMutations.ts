@@ -1,64 +1,117 @@
 "use client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addTodo, deleteTodo } from "@/services/todoService";
+import {
+  addTodo,
+  deleteTodo,
+  toggleTodoCompletion,
+} from "@/services/todoService";
 import { NewTodo, Todo } from "@/types";
+import { storeTodos } from "@/utils/localeStorage";
 
 export const useTodoMutations = () => {
   const queryClient = useQueryClient();
+  const TODOS_QUERY_KEY = ["todos"];
 
-  //mutation to add todo
+  const generateTempId = (): number => -Math.floor(Math.random() * 10000);
+
+  const updateTodoCache = (todos: Todo[]): void => {
+    queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, todos);
+    storeTodos(todos);
+  };
+
+  //Get the current todos
+  const getCurrentTodos = (): Todo[] =>
+    queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) || [];
+
   const addTodoMutation = useMutation({
     mutationFn: (newTodo: NewTodo) => addTodo(newTodo),
-    onMutate: async (newTodo) => {
-      await queryClient.cancelQueries({ queryKey: ["todos"] });
-      const previousTodos = queryClient.getQueryData<Todo[]>(["todos"]) || [];
 
+    onMutate: async (newTodo) => {
+      await queryClient.cancelQueries({ queryKey: TODOS_QUERY_KEY });
+
+      const previousTodos = getCurrentTodos();
       const optimisticTodo: Todo = {
         ...newTodo,
-        id: Date.now(),
+        id: generateTempId(),
       };
-
-      queryClient.setQueryData<Todo[]>(["todos"], (old = []) => [
-        optimisticTodo,
-        ...old,
-      ]);
+      const updatedTodos = [optimisticTodo, ...previousTodos];
+      updateTodoCache(updatedTodos);
 
       return { previousTodos, tempId: optimisticTodo.id };
     },
-    onError: (err, newTodo, context) => {
-      queryClient.setQueryData(["todos"], context?.previousTodos);
+
+    //revert to previous state
+    onError: (_, __, context) => {
+      if (context?.previousTodos) {
+        updateTodoCache(context.previousTodos);
+      }
     },
-    onSuccess: (newTodo, variables, context) => {
+
+    //update the temporary ID with real one
+    onSuccess: (newTodo, _, context) => {
       if (context?.tempId) {
-        queryClient.setQueryData<Todo[]>(["todos"], (oldTodos = []) =>
-          oldTodos.map((todo) =>
-            todo.id === context.tempId ? { ...todo, id: newTodo.id } : todo
-          )
+        const currentTodos = getCurrentTodos();
+        const updatedTodos = currentTodos.map((todo) =>
+          todo.id === context.tempId ? { ...todo, id: newTodo.id } : todo
         );
+
+        updateTodoCache(updatedTodos);
       }
     },
   });
 
-  //mutation to delete todo
+  //Delete todo
   const deleteTodoMutation = useMutation({
     mutationFn: (id: number) => deleteTodo(id),
-    onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: ["todos"] });
-      const previousTodos = queryClient.getQueryData<Todo[]>(["todos"]) || [];
 
-      queryClient.setQueryData<Todo[]>(["todos"], (old = []) =>
-        old.filter((todo) => todo.id !== id)
-      );
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: TODOS_QUERY_KEY });
+      const previousTodos = getCurrentTodos();
+
+      const updatedTodos = previousTodos.filter((todo) => todo.id !== id);
+      updateTodoCache(updatedTodos);
 
       return { previousTodos };
     },
-    onError: (err, id, context) => {
-      queryClient.setQueryData(["todos"], context?.previousTodos);
+
+    //revert to previous state
+    onError: (_, __, context) => {
+      if (context?.previousTodos) {
+        updateTodoCache(context.previousTodos);
+      }
+    },
+  });
+
+  //Toggle todo completion status
+
+  const toggleTodoMutation = useMutation({
+    mutationFn: ({ id, completed }: { id: number; completed: boolean }) =>
+      toggleTodoCompletion(id, completed),
+
+    onMutate: async ({ id, completed }) => {
+      await queryClient.cancelQueries({ queryKey: TODOS_QUERY_KEY });
+
+      const previousTodos = getCurrentTodos();
+      const updatedTodos = previousTodos.map((todo) =>
+        todo.id === id ? { ...todo, completed } : todo
+      );
+
+      updateTodoCache(updatedTodos);
+
+      return { previousTodos };
+    },
+
+    //revert to previous state
+    onError: (_, __, context) => {
+      if (context?.previousTodos) {
+        updateTodoCache(context.previousTodos);
+      }
     },
   });
 
   return {
     addTodoMutation,
     deleteTodoMutation,
+    toggleTodoMutation,
   };
 };
