@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
 import { useTodoMutations } from "@/hooks/useTodoMutations";
-import { TrashIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import { Todo } from "@/types";
+import { motion } from "framer-motion";
+import { TrashIcon } from "@/components/Icons";
 
 interface TodoItemProps {
   todo: Todo;
@@ -24,50 +25,38 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
   };
 
   return (
-    <div
-      className={`flex items-center justify-between p-3 border rounded-lg transition-all duration-200 ${
-        todo.completed ? "bg-gray-50" : "bg-white"
-      } ${isHovered ? "shadow-md" : ""}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+    <motion.div
+      className="todo-item"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+      transition={{ duration: 0.2 }}
+      layout
     >
-      <div className="flex items-center flex-1">
-        <div
-          onClick={handleToggleCompleted}
-          className="cursor-pointer flex items-center"
-          role="checkbox"
-          aria-checked={todo.completed}
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              handleToggleCompleted();
-            }
-          }}
-        >
-          {todo.completed ? (
-            <CheckCircleIcon className="h-5 w-5 text-green-500 mr-3" />
-          ) : (
-            <div className="h-5 w-5 border-2 rounded-full border-gray-300 mr-3" />
-          )}
-        </div>
+      <input
+        type="checkbox"
+        checked={todo.completed}
+        onChange={handleToggleCompleted}
+        className="todo-checkbox"
+        aria-label={`Mark "${todo.title}" as ${todo.completed ? "incomplete" : "complete"}`}
+      />
 
-        <span
-          className={`${
-            todo.completed ? "line-through text-gray-500" : "text-gray-800"
-          } transition-all duration-200`}
-        >
-          {todo.title}
-        </span>
-      </div>
-
-      <button
-        onClick={handleDelete}
-        className="text-red-500 hover:text-red-700 transition duration-200 p-2 rounded hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-        aria-label="Delete todo"
+      <span
+        className={`todo-text ${todo.completed ? "todo-text-completed" : ""}`}
       >
-        <TrashIcon className="h-5 w-5" />
-      </button>
-    </div>
+        {todo.title}
+      </span>
+
+      <motion.button
+        onClick={handleDelete}
+        className="todo-delete"
+        aria-label={`Delete "${todo.title}"`}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <TrashIcon />
+      </motion.button>
+    </motion.div>
   );
 };
 export default TodoItem;

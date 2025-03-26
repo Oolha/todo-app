@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import TodoItem from "./TodoItem";
 import { useTodoQueries } from "@/hooks/useTodoQueries";
 import { useTodoMutations } from "@/hooks/useTodoMutations";
+import { PlusIcon, ExclamationIcon, RefreshIcon } from "@/components/Icons";
+import { motion, AnimatePresence } from "framer-motion";
 
 const TodoList: React.FC = () => {
   const [newTodoText, setNewTodoText] = useState("");
@@ -11,6 +13,10 @@ const TodoList: React.FC = () => {
   const { addTodoMutation } = useTodoMutations();
 
   const { data: todos = [], isLoading, error } = todosQuery;
+
+  const completedCount = todos.filter((todo) => todo.completed).length;
+  const progressPercentage =
+    todos.length > 0 ? (completedCount / todos.length) * 100 : 0;
 
   const handleAddTodo = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,27 +35,54 @@ const TodoList: React.FC = () => {
   };
 
   return (
-    <div>
-      <h1>Todo List</h1>
-      <form onSubmit={handleAddTodo}>
-        <div className="flex">
-          <input
-            type="text"
-            value={newTodoText}
-            onChange={(e) => setNewTodoText(e.target.value)}
-            placeholder="Add a new task..."
-          />
-          <button type="submit">Add</button>
-        </div>
-      </form>
+    <div className="todo-container">
+      <motion.h1
+        className="todo-title"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        Todo List
+      </motion.h1>
+      <motion.form
+        onSubmit={handleAddTodo}
+        className="todo-form"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.1 }}
+      >
+        <input
+          type="text"
+          value={newTodoText}
+          onChange={(e) => setNewTodoText(e.target.value)}
+          placeholder="Add a new task..."
+          className="todo-input"
+          aria-label="New todo text"
+        />
+        <button
+          type="submit"
+          disabled={!newTodoText.trim()}
+          className="todo-button"
+          aria-label="Add new todo"
+        >
+          <PlusIcon className="h-5 w-5 mr-1" />
+          Add
+        </button>
+      </motion.form>
 
-      {isLoading && <p className="text-center py-4">Loading...</p>}
+      {/* Loading State */}
+      {isLoading && (
+        <div className="loading">
+          <div className="loading-spinner"></div>
+        </div>
+      )}
+      {/* Error State */}
       {error && (
         <p className="text-center py-4 text-red-500">
           Failed to load task list. Please try again later.
         </p>
       )}
-
+      {/* Empty State */}
       <div className="space-y-3">
         {todos.length === 0 && !isLoading ? (
           <p className="text-center text-gray-500">No tasks yet</p>
@@ -57,15 +90,45 @@ const TodoList: React.FC = () => {
           todos.map((todo) => <TodoItem todo={todo} key={todo.id} />)
         )}
       </div>
-      {/* Todo Summary */}
+      {/* Todo List */}
+      <AnimatePresence>
+        {!isLoading && todos.length > 0 && (
+          <motion.div
+            className="todo-list"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            {todos.map((todo) => (
+              <TodoItem key={todo.id} todo={todo} />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Progress Bar */}
       {!isLoading && todos.length > 0 && (
-        <div className="mt-6 pt-4 border-t text-sm text-gray-500 flex justify-between">
-          <span>Total: {todos.length} tasks</span>
-          <span>
-            Completed: {todos.filter((todo) => todo.completed).length} /{" "}
-            {todos.length}
-          </span>
-        </div>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          <div className="progress-container">
+            <motion.div
+              className="progress-bar"
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPercentage}%` }}
+              transition={{ duration: 0.5 }}
+            ></motion.div>
+          </div>
+
+          <div className="todo-status">
+            <span>Total: {todos.length} tasks</span>
+            <span>
+              Completed: {completedCount} / {todos.length}
+            </span>
+          </div>
+        </motion.div>
       )}
     </div>
   );

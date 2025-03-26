@@ -4,7 +4,7 @@ import Providers from "@/components/Providers";
 
 export const metadata: Metadata = {
   title: "Todo App",
-  description: "Simple Todo application with Next.js and JSONPlaceholder API",
+  description: "A simple, spring-themed Todo application with Next.js",
 };
 
 export default function RootLayout({
