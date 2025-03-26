@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Todo App
 
-## Getting Started
+A simple todo list application built with Next.js and JSONPlaceholder API. The app allows users to view, add, and delete tasks.
 
-First, run the development server:
+## 🚀 Features
+
+- **Fetch and display** todos from JSONPlaceholder API
+- **Add** new todos
+- **Delete** existing todos
+- **Optimistic UI updates** for instant feedback
+- **Data persistence** between sessions via localStorage
+- **Responsive design** with a pleasant spring-themed UI
+
+## 🛠️ Technologies
+
+- **Next.js 14** - React framework with App Router
+- **React Query (TanStack Query)** - State management and API requests
+- **Tailwind CSS** - Styling
+- **Framer Motion** - Animations and transitions
+- **Axios** - HTTP requests
+- **TypeScript** - Type safety
+- **localStorage API** - Browser data persistence
+
+## 🏗️ Architecture
+
+The project follows a clean, modular architecture:
+
+```
+├── app                  # Next.js App Router
+├── components           # React components
+│   ├── Icons.tsx        # SVG icons
+│   ├── Providers.tsx    # Context providers
+│   ├── TodoItem.tsx     # Individual todo component
+│   └── TodoList.tsx     # Todo list component
+├── hooks                # Custom React hooks
+│   ├── useTodoMutations.tsx  # Mutations hook (add, delete)
+│   └── useTodoQueries.tsx    # Queries hook (fetch)
+├── services             # API services
+│   └── todoService.ts   # Todo API service
+├── types                # TypeScript types
+│   └── index.ts         # Todo types
+└── utils                # Utility functions
+    ├── constants.ts     # Constants
+    └── localStorage.ts  # localStorage utilities
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+ installed
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/Oolha/todo-app.git
+cd todo-app
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Run the development server:
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🔍 Technical Details
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Optimistic Updates
 
-## Learn More
+The app uses React Query's optimistic updates pattern for a seamless user experience:
 
-To learn more about Next.js, take a look at the following resources:
+1. Updates local state immediately
+2. Sends API request in the background
+3. Restores previous state if the API call fails
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Persistence Strategy
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Since JSONPlaceholder doesn't actually save changes, the app implements its own persistence strategy:
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Initial data is loaded from the API
+2. All changes are saved to localStorage
+3. On page refresh, the app loads data from localStorage

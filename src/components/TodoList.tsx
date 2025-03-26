@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import TodoItem from "./TodoItem";
 import { useTodoQueries } from "@/hooks/useTodoQueries";
 import { useTodoMutations } from "@/hooks/useTodoMutations";
-import { PlusIcon, ExclamationIcon, RefreshIcon } from "@/components/Icons";
+import { PlusIcon } from "@/components/Icons";
 import { motion, AnimatePresence } from "framer-motion";
 
 const TodoList: React.FC = () => {
