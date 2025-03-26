@@ -76,21 +76,20 @@ const TodoList: React.FC = () => {
           <div className="loading-spinner"></div>
         </div>
       )}
+
       {/* Error State */}
       {error && (
         <p className="text-center py-4 text-red-500">
           Failed to load task list. Please try again later.
         </p>
       )}
+
       {/* Empty State */}
-      <div className="space-y-3">
-        {todos.length === 0 && !isLoading ? (
-          <p className="text-center text-gray-500">No tasks yet</p>
-        ) : (
-          todos.map((todo) => <TodoItem todo={todo} key={todo.id} />)
-        )}
-      </div>
-      {/* Todo List */}
+      {!isLoading && todos.length === 0 && (
+        <p className="text-center text-gray-500">No tasks yet</p>
+      )}
+
+      {/* Todo List with AnimatePresence */}
       <AnimatePresence>
         {!isLoading && todos.length > 0 && (
           <motion.div
@@ -133,5 +132,4 @@ const TodoList: React.FC = () => {
     </div>
   );
 };
-
 export default TodoList;
