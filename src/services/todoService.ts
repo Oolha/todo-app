@@ -1,12 +1,10 @@
-import { NewTodo, Todo } from "@/types";
-import { getStoredTodos } from "@/utils/localeStorage";
 import axios from "axios";
-
-const BASE_URL = "https://jsonplaceholder.typicode.com/todos";
-const API_LIMIT = 10;
+import { NewTodo, Todo } from "@/types";
+import { getStoredTodos } from "@/utils/localStorage";
+import { API } from "@/utils/constants";
 
 const todoApi = axios.create({
-  baseURL: BASE_URL,
+  baseURL: API.TODO_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -22,7 +20,7 @@ export const getTodos = async (): Promise<Todo[]> => {
   }
 
   try {
-    const response = await todoApi.get<Todo[]>(`?_limit=${API_LIMIT}`);
+    const response = await todoApi.get<Todo[]>(`?_limit=${API.DEFAULT_LIMIT}`);
     return response.data;
   } catch (error) {
     console.error("Failed to fetch todos:", error);

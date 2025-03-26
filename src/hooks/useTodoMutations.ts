@@ -6,28 +6,28 @@ import {
   toggleTodoCompletion,
 } from "@/services/todoService";
 import { NewTodo, Todo } from "@/types";
-import { storeTodos } from "@/utils/localeStorage";
+import { storeTodos } from "@/utils/localStorage";
+import { QUERY_KEYS } from "@/utils/constants";
 
 export const useTodoMutations = () => {
   const queryClient = useQueryClient();
-  const TODOS_QUERY_KEY = ["todos"];
 
   const generateTempId = (): number => -Math.floor(Math.random() * 10000);
 
   const updateTodoCache = (todos: Todo[]): void => {
-    queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, todos);
+    queryClient.setQueryData<Todo[]>(QUERY_KEYS.TODOS, todos);
     storeTodos(todos);
   };
 
   //Get the current todos
   const getCurrentTodos = (): Todo[] =>
-    queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) || [];
+    queryClient.getQueryData<Todo[]>(QUERY_KEYS.TODOS) || [];
 
   const addTodoMutation = useMutation({
     mutationFn: (newTodo: NewTodo) => addTodo(newTodo),
 
     onMutate: async (newTodo) => {
-      await queryClient.cancelQueries({ queryKey: TODOS_QUERY_KEY });
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.TODOS });
 
       const previousTodos = getCurrentTodos();
       const optimisticTodo: Todo = {
@@ -65,7 +65,7 @@ export const useTodoMutations = () => {
     mutationFn: (id: number) => deleteTodo(id),
 
     onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: TODOS_QUERY_KEY });
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.TODOS });
       const previousTodos = getCurrentTodos();
 
       const updatedTodos = previousTodos.filter((todo) => todo.id !== id);
@@ -89,7 +89,7 @@ export const useTodoMutations = () => {
       toggleTodoCompletion(id, completed),
 
     onMutate: async ({ id, completed }) => {
-      await queryClient.cancelQueries({ queryKey: TODOS_QUERY_KEY });
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.TODOS });
 
       const previousTodos = getCurrentTodos();
       const updatedTodos = previousTodos.map((todo) =>

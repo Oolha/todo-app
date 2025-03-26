@@ -1,19 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { getTodos } from "@/services/todoService";
-import { Todo } from "@/types";
 import { useEffect } from "react";
-import { storeTodos } from "@/utils/localeStorage";
+import { storeTodos } from "@/utils/localStorage";
+import { QUERY_KEYS, STALE_TIMES } from "@/utils/constants";
 
 export const useTodoQueries = () => {
-  const TODOS_QUERY_KEY = ["todos"];
-
-  //5 minutes
-  const STALE_TIME = 5 * 60 * 1000;
-
   const todosQuery = useQuery({
-    queryKey: TODOS_QUERY_KEY,
+    queryKey: QUERY_KEYS.TODOS,
     queryFn: getTodos,
-    staleTime: STALE_TIME,
+    staleTime: STALE_TIMES.TODOS,
   });
 
   // When todos are successfully fetched and not from localStorage,
