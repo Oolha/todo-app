@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 import { useTodoMutations } from "@/hooks/useTodoMutations";
 import { Todo } from "@/types";
 import { motion } from "framer-motion";
@@ -10,7 +9,6 @@ interface TodoItemProps {
 }
 
 const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
-  const [isHovered, setIsHovered] = useState(false);
   const { deleteTodoMutation, toggleTodoMutation } = useTodoMutations();
 
   const handleDelete = () => {
